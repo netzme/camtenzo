@@ -6,21 +6,19 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 
-public class CameraActivity extends Activity {
-
-    public static final String EXTRA_MESSAGE = "Message New Image";
+public class FilterImageActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_camera);
+        setContentView(R.layout.activity_filter_image);
     }
 
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.camera, menu);
+        getMenuInflater().inflate(R.menu.filter_image, menu);
         return true;
     }
 

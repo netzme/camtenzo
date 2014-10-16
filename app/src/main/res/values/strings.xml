@@ -4,5 +4,9 @@
     <string name="app_name">CamTenzo</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="title_activity_filter_image">FilterImageActivity</string>
+    <string name="send">Send</string>
+    <string name="black_n_white">B/W</string>
+    <string name="sephia">sephia</string>
 
 </resources>
