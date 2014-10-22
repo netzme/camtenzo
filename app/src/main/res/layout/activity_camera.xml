@@ -8,30 +8,36 @@
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_gravity="left|top"
         tools:context=".CameraActivity">
 
 
         <SurfaceView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent= "true"
+            android:id="@+id/surfaceViewCamera"
+            android:layout_width="match_parent"
 
-            android:id="@+id/surfaceViewCamera" />
+            android:layout_height="match_parent"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="2dp" />
 
         <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:id="@+id/imageViewOverlay"
-            android:layout_below="@+id/surfaceViewCamera"
-            android:layout_centerHorizontal="true" />
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+
+            android:layout_alignParentLeft="@+id/surfaceViewCamera"
+            android:layout_marginBottom="2dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/overlay" />
+        />
 
         <Button
+            android:id="@+id/buttonShutter"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/buttonShutter"
-            android:background= "@drawable/camera"
-            android:layout_centerVertical="true"
-            android:layout_alignParentEnd="true" />
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:background="@drawable/camera" />
 
     </RelativeLayout>
 

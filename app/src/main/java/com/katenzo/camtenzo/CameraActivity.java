@@ -1,10 +1,18 @@
 package com.katenzo.camtenzo;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.PixelFormat;
+import android.graphics.drawable.Drawable;
 import android.hardware.Camera;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SurfaceHolder;
@@ -15,16 +23,26 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+import static android.hardware.Camera.PictureCallback;
+import static android.hardware.Camera.ShutterCallback;
+
 
 public class CameraActivity extends Activity implements SurfaceHolder.Callback {
+    static final String INTENT_NAME = "original";
     SurfaceView surfaceViewCamera;
     SurfaceHolder cameraSurfaceHolder;
     Camera camera = null;
     boolean previewing = false;
+
+
+
     private Button buttonShutter;
     private ImageView imageOverlay;
-
-    public static final String EXTRA_MESSAGE = "Message New Image";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,25 +58,127 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
 
         setContentView(R.layout.activity_camera);
 
-        buttonShutter = (Button) findViewById(R.id.buttonShutter);
+
         surfaceViewCamera = (SurfaceView) findViewById(R.id.surfaceViewCamera);
         imageOverlay = (ImageView) findViewById(R.id.imageViewOverlay);
 
         cameraSurfaceHolder = surfaceViewCamera.getHolder();
         cameraSurfaceHolder.addCallback(this);
 
-        buttonShutter.setOnClickListener(buttonShutterClick);
+        buttonShutter = (Button) findViewById(R.id.buttonShutter);
+        buttonShutter.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                camera.takePicture(cameraShutterCallBack,cameraPictureCallback,cameraPictureCallbackJpeg);
+
+            }
+        });
 
 
     }
 
-    View.OnClickListener buttonShutterClick = new View.OnClickListener() {
 
+    ShutterCallback cameraShutterCallBack = new ShutterCallback() {
         @Override
-        public void onClick(View v) {
+        public void onShutter() {
 
         }
     };
+
+    PictureCallback cameraPictureCallback = new PictureCallback() {
+
+        @Override
+        public void onPictureTaken(byte[] data, Camera camera) {
+
+        }
+    };
+
+    PictureCallback cameraPictureCallbackJpeg = new PictureCallback() {
+
+        @Override
+        public void onPictureTaken(byte[] data, Camera camera) {
+            Bitmap newImage = getBitmapFromCamera(data, camera);
+            File file = saveBitmapToFile(newImage);
+            flushImage(newImage);
+            setIntent(file);
+
+        }
+    };
+
+    private Bitmap getBitmapFromCamera(byte[] data, Camera camera) {
+        Bitmap cameraBitmap = BitmapFactory.decodeByteArray
+                (data, 0, data.length);
+        int   wid = cameraBitmap.getWidth();
+        int  hgt = cameraBitmap.getHeight();
+
+        //  Toast.makeText(getApplicationContext(), wid+""+hgt, Toast.LENGTH_SHORT).show();
+        Bitmap newImage = Bitmap.createBitmap
+                (wid, hgt, Bitmap.Config.ARGB_8888);
+
+        Canvas canvas = new Canvas(newImage);
+
+        canvas.drawBitmap(cameraBitmap, 0f, 0f, null);
+
+        Drawable drawable = getResources().getDrawable
+                (R.drawable.overlay);
+        drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+        drawable.draw(canvas);
+
+
+        return newImage;
+
+    }
+
+    private File saveBitmapToFile(Bitmap newImage) {
+
+        File storagePath = new File(Environment.
+                getExternalStorageDirectory() + "/camtenzo/");
+        storagePath.mkdirs();
+
+        File myImage = new File(storagePath,
+                Long.toString(System.currentTimeMillis()) + ".jpg");
+
+        try
+        {
+            FileOutputStream out = new FileOutputStream(myImage);
+            newImage.compress(Bitmap.CompressFormat.JPEG, 80, out);
+
+
+            out.flush();
+            out.close();
+        }
+        catch(FileNotFoundException e)
+        {
+            Log.d("In Saving File", e + "");
+        }
+        catch(IOException e)
+        {
+            Log.d("In Saving File", e + "");
+        }
+
+        camera.startPreview();
+        return myImage;
+    }
+
+    private void flushImage(Bitmap newImage) {
+        newImage.recycle();
+        newImage = null;
+    }
+
+    private void setIntent(File myImage) {
+
+        Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_VIEW);
+        intent.putExtra(INTENT_NAME,getUriFileName(myImage));
+        intent.setDataAndType(getUriFileName(myImage), "image/*");
+        startActivity(intent);
+
+    }
+
+    private Uri getUriFileName(File myImage) {
+        return Uri.parse("file://" + myImage.getAbsolutePath());
+    }
 
 
     @Override

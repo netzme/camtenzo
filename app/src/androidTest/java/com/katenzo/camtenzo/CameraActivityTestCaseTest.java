@@ -1,16 +1,14 @@
 package com.katenzo.camtenzo;
 
 import android.Manifest;
-import android.content.Intent;
 import android.test.AndroidTestCase;
 
-/**
- * Created by katenzo on 10/7/14.
- */
+
 public class CameraActivityTestCaseTest extends AndroidTestCase {
     private final static String PKG = "com.katenzo.camtenzo";
     private final static String ACTIVITY =  PKG + ".CameraActivity";
-    private final static String PERMISSION = Manifest.permission.CAMERA;
+    private final static String CAMERA_PERMISSION = Manifest.permission.CAMERA;
+    private final static String WRITE_EXTERNAL_STORAGE_PERMISSION = Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
     public CameraActivityTestCaseTest() {
         this("CameraActivityTestCaseTest");
@@ -30,7 +28,11 @@ public class CameraActivityTestCaseTest extends AndroidTestCase {
     }
 
     public void testHaveCameraPermission() {
-            assertActivityRequiresPermission(PKG, ACTIVITY, PERMISSION);
+        assertActivityRequiresPermission(PKG, ACTIVITY, CAMERA_PERMISSION);
+    }
+
+    public void testHaveWriteExternalStoragePermission() {
+        assertActivityRequiresPermission(PKG, ACTIVITY, WRITE_EXTERNAL_STORAGE_PERMISSION);
     }
 
 

@@ -1,25 +1,20 @@
 package com.katenzo.camtenzo;
 
-import android.app.ActionBar;
 import android.app.Instrumentation;
-import android.content.res.Configuration;
-import android.graphics.Bitmap;
-
+import android.content.Intent;
 import android.graphics.PixelFormat;
-import android.graphics.drawable.Drawable;
 import android.hardware.Camera;
-import android.media.Image;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.UiThreadTest;
 import android.test.ViewAsserts;
 import android.test.suitebuilder.annotation.Suppress;
+import android.text.Layout;
 import android.view.Gravity;
-import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 
 
@@ -96,15 +91,11 @@ public class CameraActivityTest extends ActivityInstrumentationTestCase2<CameraA
 
     }
 
-
+    @Suppress
     public void testCameraDisplayOrientation90IfActivityNotLandscapeMode() {
         int orientation = cameraActivity.getResources().getConfiguration().orientation;
     }
 
-
-    private Camera.Parameters getCameraParameters() {
-        return  cameraActivity.camera.getParameters();
-    }
 
     public void testSurfaceDestroyCameraRelease() {
         cameraActivity.surfaceDestroyed(cameraActivity.cameraSurfaceHolder);
@@ -125,10 +116,6 @@ public class CameraActivityTest extends ActivityInstrumentationTestCase2<CameraA
     }
 
 
-
-
-
-
     private  boolean isCameraUsebyApp() {
         Camera camera = null;
         try {
@@ -145,6 +132,49 @@ public class CameraActivityTest extends ActivityInstrumentationTestCase2<CameraA
     private View getDecorViewActivity() {
         return cameraActivity.getWindow().getDecorView();
     }
+
+
+    public void testImageOverlay_layout() {
+
+        final ViewGroup.LayoutParams layoutParams =
+                imageOverlay.getLayoutParams();
+        assertNotNull(layoutParams);
+        assertEquals(layoutParams.width, WindowManager.LayoutParams.MATCH_PARENT);
+        assertEquals(layoutParams.height, WindowManager.LayoutParams.MATCH_PARENT);
+
+    }
+
+    public void testImageOverlayScaleType() {
+        ImageView.ScaleType scaleTypeExpected = ImageView.ScaleType.FIT_XY;
+        ImageView.ScaleType scaleType = imageOverlay.getScaleType();
+        assertEquals(scaleTypeExpected, scaleType);
+    }
+
+    public void testSurfaceView_layout() {
+        final ViewGroup.LayoutParams layoutParams =
+                cameraActivity.surfaceViewCamera.getLayoutParams();
+        assertNotNull(layoutParams);
+        assertEquals(layoutParams.width, WindowManager.LayoutParams.MATCH_PARENT);
+        assertEquals(layoutParams.height, WindowManager.LayoutParams.MATCH_PARENT);
+    }
+
+    public void testSurfaceViewAndImageOverlayAlignment() {
+        ViewAsserts.assertRightAligned(cameraActivity.surfaceViewCamera, imageOverlay);
+        ViewAsserts.assertLeftAligned(cameraActivity.surfaceViewCamera, imageOverlay);
+        ViewAsserts.assertBottomAligned(cameraActivity.surfaceViewCamera, imageOverlay);
+        ViewAsserts.assertTopAligned(cameraActivity.surfaceViewCamera, imageOverlay);
+    }
+
+    public void testButtonShutterHaveCenterAlignment() {
+        final ViewGroup.LayoutParams layoutParams = buttonShutter.getLayoutParams();
+        Layout buttonShutterLayout = buttonShutter.getLayout();
+
+        Layout.Alignment expectedAlignment = Layout.Alignment.ALIGN_CENTER;
+        Layout.Alignment actualAlignment = buttonShutterLayout.getAlignment();
+        assertEquals(expectedAlignment, actualAlignment);
+    }
+
+
 
 
 }
