@@ -1,6 +1,7 @@
 package com.katenzo.camtenzo;
 
 import android.app.Instrumentation;
+import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.hardware.Camera;
 import android.test.ActivityInstrumentationTestCase2;
@@ -173,14 +174,7 @@ public class CameraActivityTest extends ActivityInstrumentationTestCase2<CameraA
         assertEquals(expectedAlignment, actualAlignment);
     }
 
-    @UiThreadTest
-    public void testButtonShutterClickTakeAPicture() {
-        /* Todo */
-        buttonShutter.requestFocus();
-        buttonShutter.performClick();
 
-
-    }
 
 
 }
