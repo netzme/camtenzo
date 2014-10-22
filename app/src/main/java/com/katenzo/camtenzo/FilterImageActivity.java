@@ -1,17 +1,58 @@
 package com.katenzo.camtenzo;
 
 import android.app.Activity;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.effect.Effect;
+import android.media.effect.EffectContext;
+import android.media.effect.EffectFactory;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ImageView;
+
+import java.util.logging.Filter;
 
 
 public class FilterImageActivity extends Activity {
+
+    private ImageView image;
+    private Button filterGrayscale;
+    private Button filterSephia;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_filter_image);
+
+        final Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.raw.meme);
+
+        image = (ImageView) findViewById(R.id.image_container);
+        image.setImageBitmap(bitmap);
+
+        filterGrayscale = (Button) findViewById(R.id.filter_gray_scale);
+
+        filterGrayscale.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                image.setImageBitmap(FilterImage.convertToGrayScale(bitmap));
+            }
+        });
+
+        filterSephia = (Button) findViewById(R.id.filter_sephia);
+        filterSephia.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                image.setImageBitmap(FilterImage.convertToSephia(bitmap,1,10,10,255));
+            }
+        });
+
+        
+
+
+
     }
 
 

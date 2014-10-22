@@ -1,11 +1,15 @@
 package com.katenzo.camtenzo;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.ViewAsserts;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -21,6 +25,8 @@ public class FilterImageActivityFungsionalTestCase extends ActivityInstrumentati
     private Button buttonSend;
     private Button filterSephia;
     private Intent filterIntentImage;
+    private Bitmap dummyImage;
+
 
     public FilterImageActivityFungsionalTestCase(String name) {
         super(FilterImageActivity.class);
@@ -37,6 +43,8 @@ public class FilterImageActivityFungsionalTestCase extends ActivityInstrumentati
         assertNotNull(activity);
 
         imageContainer = (ImageView) activity.findViewById(R.id.image_container);
+        Bitmap bMap = BitmapFactory.decodeFile(Uri.parse("android.resource://"+ getActivity().getPackageName() +"/raw/meme.jpg").toString());
+        imageContainer.setImageBitmap(bMap);
         assertNotNull(imageContainer);
 
         filterGrayScale = (Button) activity.findViewById(R.id.filter_gray_scale);
@@ -48,12 +56,15 @@ public class FilterImageActivityFungsionalTestCase extends ActivityInstrumentati
         buttonSend = (Button) activity.findViewById(R.id.button_send);
         assertNotNull(buttonSend);
 
-//        filterGrayScale.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                FilterImage.convertToGrayScale(imageSrc);
-//            }
-//        });
+        dummyImage =((BitmapDrawable)imageContainer.getDrawable()).getBitmap();
+
+        filterGrayScale.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                FilterImage.convertToGrayScale(dummyImage);
+            }
+        });
     }
 
     @SmallTest
@@ -64,7 +75,6 @@ public class FilterImageActivityFungsionalTestCase extends ActivityInstrumentati
         ViewAsserts.assertOnScreen(container, filterGrayScale);
         ViewAsserts.assertOnScreen(container, filterSephia);
         ViewAsserts.assertOnScreen(container, buttonSend);
-
     }
 
     @SmallTest
