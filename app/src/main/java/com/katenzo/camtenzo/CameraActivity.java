@@ -2,6 +2,7 @@ package com.katenzo.camtenzo;
 
 import android.app.Activity;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
 import android.graphics.PixelFormat;
 import android.hardware.Camera;
 import android.os.Bundle;
@@ -15,16 +16,39 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 
+import java.io.File;
+
+import static android.hardware.Camera.PictureCallback;
+
 
 public class CameraActivity extends Activity implements SurfaceHolder.Callback {
     SurfaceView surfaceViewCamera;
     SurfaceHolder cameraSurfaceHolder;
     Camera camera = null;
     boolean previewing = false;
+    PictureCallback cameraPictureCallbackJpeg = new PictureCallback() {
+
+        @Override
+        public void onPictureTaken(byte[] data, Camera camera) {
+            Bitmap newImage = getBitmapFromCamera(data, camera);
+            File file = saveBitmapToFile(newImage);
+            flushImage(newImage);
+            setIntent(file);
+
+        }
+    };
+    View.OnClickListener buttonShutterClick = new View.OnClickListener() {
+
+        @Override
+        public void onClick(View v) {
+            camera.takePicture(null,
+                    null,
+                    cameraPictureCallbackJpeg);
+
+        }
+    };
     private Button buttonShutter;
     private ImageView imageOverlay;
-
-    public static final String EXTRA_MESSAGE = "Message New Image";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,13 +76,25 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
 
     }
 
-    View.OnClickListener buttonShutterClick = new View.OnClickListener() {
+    private Bitmap getBitmapFromCamera(byte[] data, Camera camera) {
 
-        @Override
-        public void onClick(View v) {
+        return null;
 
-        }
-    };
+    }
+
+    private File saveBitmapToFile(Bitmap newImage) {
+
+        return null;
+    }
+
+    private void flushImage(Bitmap newImage) {
+        newImage.recycle();
+        newImage = null;
+    }
+
+    private void setIntent(File myImage) {
+
+    }
 
 
     @Override
