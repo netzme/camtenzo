@@ -7,5 +7,6 @@
     <string name="black_n_white">B/W</string>
     <string name="sephia">sephia</string>
     <string name="send">Send</string>
+    <string name="title_activity_filter_image">FilterImageActivity</string>
 
 </resources>
