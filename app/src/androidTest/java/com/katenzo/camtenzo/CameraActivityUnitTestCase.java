@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Camera;
 import android.test.ActivityUnitTestCase;
 import android.test.UiThreadTest;
+import android.test.suitebuilder.annotation.Suppress;
 import android.view.SurfaceView;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -32,8 +33,14 @@ public class CameraActivityUnitTestCase extends ActivityUnitTestCase<CameraActiv
     }
 
     @UiThreadTest
+    @Suppress
     public void testButtonShutterClickTakeAPicture() {
-        /* Todo */
+        /*
+        * Test ini mengecek intent yang digenerate oleh PictureCallBackJpg
+        * Di karenakan callback prosesnya asynchronous tidak bisa dilakuakun dengan dengan performClick
+        * Perlu Pendekatan lain untuk mengecek Intent
+        *
+        * */
 
         buttonShutter.requestFocus();
         buttonShutter.performClick();

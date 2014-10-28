@@ -33,7 +33,7 @@ import static android.hardware.Camera.ShutterCallback;
 
 
 public class CameraActivity extends Activity implements SurfaceHolder.Callback {
-    static final String INTENT_NAME = "original";
+    static final String INTENT_NAME = "com.katenzo.camtenzo.EXTRA_URI";
     SurfaceView surfaceViewCamera;
     SurfaceHolder cameraSurfaceHolder;
     Camera camera = null;
@@ -168,7 +168,7 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
 
     private void setIntent(File myImage) {
 
-        Intent intent = new Intent();
+        Intent intent = new Intent(this,FilterImageActivity.class);
         intent.setAction(Intent.ACTION_VIEW);
         intent.putExtra(INTENT_NAME,getUriFileName(myImage));
         intent.setDataAndType(getUriFileName(myImage), "image/*");
