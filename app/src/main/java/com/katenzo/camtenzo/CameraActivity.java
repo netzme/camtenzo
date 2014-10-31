@@ -15,6 +15,7 @@ import android.os.Environment;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -120,11 +121,11 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
 
         canvas.drawBitmap(cameraBitmap, 0f, 0f, null);
 
-        Drawable drawable = getResources().getDrawable
+       /* Drawable drawable = getResources().getDrawable
                 (R.drawable.overlay);
         drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
         drawable.draw(canvas);
-
+*/
 
         return newImage;
 
@@ -202,12 +203,8 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
+        cameraOpen();
 
-        try {
-            camera = Camera.open();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
 
     }
 
@@ -232,10 +229,34 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
     }
 
     private void setupCameraDisplayOrientation() {
-        if ( getResources().getConfiguration().orientation != Configuration.ORIENTATION_LANDSCAPE) {
-            camera.setDisplayOrientation(90);
-        }
+        setCameraDisplayOrientation(this,Camera.CameraInfo.CAMERA_FACING_FRONT,camera);
     }
+
+    public static void setCameraDisplayOrientation(Activity activity,
+                                                   int cameraId, android.hardware.Camera camera) {
+        android.hardware.Camera.CameraInfo info =
+                new android.hardware.Camera.CameraInfo();
+        android.hardware.Camera.getCameraInfo(cameraId, info);
+        int rotation = activity.getWindowManager().getDefaultDisplay()
+                .getRotation();
+        int degrees = 0;
+        switch (rotation) {
+            case Surface.ROTATION_0: degrees = 0; break;
+            case Surface.ROTATION_90: degrees = 90; break;
+            case Surface.ROTATION_180: degrees = 180; break;
+            case Surface.ROTATION_270: degrees = 270; break;
+        }
+
+        int result;
+        if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+            result = (info.orientation + degrees) % 360;
+            result = (360 - result) % 360;  // compensate the mirror
+        } else {  // back-facing
+            result = (info.orientation - degrees + 360) % 360;
+        }
+        camera.setDisplayOrientation(result);
+    }
+
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
@@ -250,11 +271,32 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         cameraRelease();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        cameraReopen();
+    }
+
+    private void cameraOpen() {
+        try {
+            camera = Camera.open();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+    }
+
     private void cameraRelease() {
         if (camera != null) {
             camera.stopPreview();
             camera.release();
             camera = null;
+        }
+    }
+
+    private void cameraReopen() {
+        if (camera == null) {
+            cameraOpen();
         }
     }
 }
