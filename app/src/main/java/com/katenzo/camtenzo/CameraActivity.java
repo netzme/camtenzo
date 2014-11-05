@@ -23,11 +23,13 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.List;
 
 import static android.hardware.Camera.PictureCallback;
 import static android.hardware.Camera.ShutterCallback;
@@ -35,11 +37,12 @@ import static android.hardware.Camera.ShutterCallback;
 
 public class CameraActivity extends Activity implements SurfaceHolder.Callback {
     static final String INTENT_NAME = "com.katenzo.camtenzo.EXTRA_URI";
+    final int COMPRESS_QUALITY = 90;
+
     SurfaceView surfaceViewCamera;
     SurfaceHolder cameraSurfaceHolder;
     Camera camera = null;
     boolean previewing = false;
-
 
 
     private Button buttonShutter;
@@ -59,7 +62,6 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
 
         setContentView(R.layout.activity_camera);
 
-
         surfaceViewCamera = (SurfaceView) findViewById(R.id.surfaceViewCamera);
         imageOverlay = (ImageView) findViewById(R.id.imageViewOverlay);
 
@@ -71,12 +73,27 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
 
             @Override
             public void onClick(View v) {
-                camera.takePicture(cameraShutterCallBack,cameraPictureCallback,cameraPictureCallbackJpeg);
-
+                if (camera != null) {
+                    takePicture();
+                } else {
+                    Toast.makeText(getApplicationContext(), "Camera Not ready or use by another application or No have permission", Toast.LENGTH_LONG).show();
+                }
             }
+
+
         });
 
 
+    }
+
+    private void takePicture() {
+        try {
+
+            camera.takePicture(cameraShutterCallBack, cameraPictureCallback, cameraPictureCallbackJpeg);
+
+        } catch (Exception ex ) {
+            Toast.makeText(getApplicationContext(), ex.getMessage(), Toast.LENGTH_LONG).show();
+        }
     }
 
 
@@ -101,31 +118,33 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         public void onPictureTaken(byte[] data, Camera camera) {
             Bitmap newImage = getBitmapFromCamera(data, camera);
             File file = saveBitmapToFile(newImage);
+            cameraStartPreview();
             flushImage(newImage);
             setIntent(file);
 
         }
     };
 
+
+
     private Bitmap getBitmapFromCamera(byte[] data, Camera camera) {
         Bitmap cameraBitmap = BitmapFactory.decodeByteArray
                 (data, 0, data.length);
-        int   wid = cameraBitmap.getWidth();
-        int  hgt = cameraBitmap.getHeight();
+        int cameraBitmapWidth = cameraBitmap.getWidth();
+        int cameraBitmapHeight = cameraBitmap.getHeight();
 
-        //  Toast.makeText(getApplicationContext(), wid+""+hgt, Toast.LENGTH_SHORT).show();
         Bitmap newImage = Bitmap.createBitmap
-                (wid, hgt, Bitmap.Config.ARGB_8888);
+                (cameraBitmapWidth, cameraBitmapHeight, Bitmap.Config.ARGB_8888);
 
         Canvas canvas = new Canvas(newImage);
 
         canvas.drawBitmap(cameraBitmap, 0f, 0f, null);
 
-       /* Drawable drawable = getResources().getDrawable
+        Drawable drawable = getResources().getDrawable
                 (R.drawable.overlay);
-        drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+        drawable.setBounds(0, 0, cameraBitmapWidth, cameraBitmapHeight);
         drawable.draw(canvas);
-*/
+
 
         return newImage;
 
@@ -140,26 +159,25 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         File myImage = new File(storagePath,
                 Long.toString(System.currentTimeMillis()) + ".jpg");
 
-        try
-        {
+        try {
             FileOutputStream out = new FileOutputStream(myImage);
-            newImage.compress(Bitmap.CompressFormat.JPEG, 80, out);
-
-
+            newImage.compress(Bitmap.CompressFormat.JPEG, COMPRESS_QUALITY, out);
             out.flush();
             out.close();
-        }
-        catch(FileNotFoundException e)
-        {
+        } catch (FileNotFoundException e) {
             Log.d("In Saving File", e + "");
-        }
-        catch(IOException e)
-        {
+        } catch (IOException e) {
             Log.d("In Saving File", e + "");
         }
 
-        camera.startPreview();
+
         return myImage;
+    }
+
+    private void cameraStartPreview() {
+        if (camera != null) {
+            camera.startPreview();
+        }
     }
 
     private void flushImage(Bitmap newImage) {
@@ -169,9 +187,9 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
 
     private void setIntent(File myImage) {
 
-        Intent intent = new Intent(this,FilterImageActivity.class);
+        Intent intent = new Intent(this, FilterImageActivity.class);
         intent.setAction(Intent.ACTION_VIEW);
-        intent.putExtra(INTENT_NAME,getUriFileName(myImage));
+        intent.putExtra(INTENT_NAME, getUriFileName(myImage));
         intent.setDataAndType(getUriFileName(myImage), "image/*");
         startActivity(intent);
 
@@ -204,8 +222,6 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         cameraOpen();
-
-
     }
 
     @Override
@@ -217,6 +233,8 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
 
         try {
             setupCameraDisplayOrientation();
+            setupCameraParameters();
+
             camera.setPreviewDisplay(cameraSurfaceHolder);
             camera.startPreview();
             previewing = true;
@@ -229,7 +247,7 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
     }
 
     private void setupCameraDisplayOrientation() {
-        setCameraDisplayOrientation(this,Camera.CameraInfo.CAMERA_FACING_FRONT,camera);
+        setCameraDisplayOrientation(this, Camera.CameraInfo.CAMERA_FACING_FRONT, camera);
     }
 
     public static void setCameraDisplayOrientation(Activity activity,
@@ -241,20 +259,48 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
                 .getRotation();
         int degrees = 0;
         switch (rotation) {
-            case Surface.ROTATION_0: degrees = 0; break;
-            case Surface.ROTATION_90: degrees = 90; break;
-            case Surface.ROTATION_180: degrees = 180; break;
-            case Surface.ROTATION_270: degrees = 270; break;
+            case Surface.ROTATION_0:
+                degrees = 0;
+                break;
+            case Surface.ROTATION_90:
+                degrees = 90;
+                break;
+            case Surface.ROTATION_180:
+                degrees = 180;
+                break;
+            case Surface.ROTATION_270:
+                degrees = 270;
+                break;
         }
 
         int result;
         if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
             result = (info.orientation + degrees) % 360;
-            result = (360 - result) % 360;  // compensate the mirror
-        } else {  // back-facing
+            result = (360 - result) % 360;
+        } else {
             result = (info.orientation - degrees + 360) % 360;
         }
         camera.setDisplayOrientation(result);
+    }
+
+    private void setupCameraParameters() {
+        Camera.Parameters parameters = camera.getParameters();
+        parameters.setFlashMode(Camera.Parameters.FLASH_MODE_AUTO);
+        parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
+        Camera.Size size = getCameraSize(parameters);
+        parameters.setPictureSize(size.width, size.height);
+        camera.setParameters(parameters);
+    }
+
+    private Camera.Size getCameraSize(Camera.Parameters parameters) {
+        List<Camera.Size> sizes = parameters.getSupportedPictureSizes();
+        Camera.Size size = sizes.get(0);
+        for(int i=0;i<sizes.size();i++)
+        {
+            if(sizes.get(i).width > size.width)
+                size = sizes.get(i);
+        }
+        return size;
     }
 
 
