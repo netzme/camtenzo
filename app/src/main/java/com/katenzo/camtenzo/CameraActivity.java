@@ -130,23 +130,7 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
     private Bitmap getBitmapFromCamera(byte[] data, Camera camera) {
         Bitmap cameraBitmap = BitmapFactory.decodeByteArray
                 (data, 0, data.length);
-        int cameraBitmapWidth = cameraBitmap.getWidth();
-        int cameraBitmapHeight = cameraBitmap.getHeight();
-
-        Bitmap newImage = Bitmap.createBitmap
-                (cameraBitmapWidth, cameraBitmapHeight, Bitmap.Config.ARGB_8888);
-
-        Canvas canvas = new Canvas(newImage);
-
-        canvas.drawBitmap(cameraBitmap, 0f, 0f, null);
-
-        Drawable drawable = getResources().getDrawable
-                (R.drawable.overlay);
-        drawable.setBounds(0, 0, cameraBitmapWidth, cameraBitmapHeight);
-        drawable.draw(canvas);
-
-
-        return newImage;
+        return cameraBitmap;
 
     }
 
