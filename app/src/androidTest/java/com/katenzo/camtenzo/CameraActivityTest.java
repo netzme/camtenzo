@@ -173,6 +173,18 @@ public class CameraActivityTest extends ActivityInstrumentationTestCase2<CameraA
         Layout.Alignment actualAlignment = buttonShutterLayout.getAlignment();
         assertEquals(expectedAlignment, actualAlignment);
     }
+    @UiThreadTest
+    public void testReopenCameraWhenOnResume() {
+        Instrumentation mInstr = this.getInstrumentation();
+        cameraActivity.surfaceCreated(cameraActivity.cameraSurfaceHolder);
+        mInstr.callActivityOnResume(cameraActivity);
+        assertNotNull(cameraActivity.camera);
+
+    }
+
+
+
+
 
 
 
